@@ -142,6 +142,8 @@ const OSForm = () => {
               <div className="bg-green-500 ">3</div>
               <div className="bg-slate-50 ">4</div>
             </div>
+
+            <hr className="mt-5" />
           </form>
         </div>
       </div>
