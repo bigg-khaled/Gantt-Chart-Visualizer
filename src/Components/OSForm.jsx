@@ -29,11 +29,6 @@ const OSForm = () => {
       <div className="bg-slate-800 pt-5 h-screen ">
         <div className="w-1/2 flex mx-auto ">
           <form onSubmit={handleSubmit} className="new-item-form">
-            <div className="grid-flow-col auto-cols-max hover:auto-cols-min grid grid-cols-[200px_auto]">
-              <div className="bg-slate-50 ">2</div>
-              <div className="bg-green-500 ">1</div>
-              <div className="bg-slate-50 ">3</div>
-            </div>
             <div className="form-row">
               <div class="mb-6">
                 <label
@@ -127,6 +122,11 @@ const OSForm = () => {
                   </tr>
                 </tbody>
               </table>
+            </div>
+            <div className={`grid grid-flow-col grid grid-cols-${3} mt-10`}>
+              <div className="bg-slate-50 ">4</div>
+              <div className="bg-green-500 ">3</div>
+              <div className="bg-slate-50 ">4</div>
             </div>
           </form>
         </div>
