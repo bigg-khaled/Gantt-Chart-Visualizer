@@ -2,11 +2,10 @@ import React from "react";
 import { useState } from "react";
 
 const OSForm = () => {
-  const [NewItem, setNewItem] = useState("");
-  const [todos, setTodos] = useState([]);
   const process = (arrival_time, priority, burst) => {
     return { arrival_time: arrival_time, priority: priority, burst: burst };
   };
+  const [numOfProcesses, setNumOfProcesses] = useState(1);
   const [processes, setProcesses] = useState([]);
 
   const [arrival_time, setArrival_time] = useState([]);
@@ -19,9 +18,18 @@ const OSForm = () => {
     setProcesses((currentProcesses) => {
       return [
         ...processes,
-        { id: crypto.randomUUID(), title: NewItem, completed: false },
+        {
+          id: numOfProcesses,
+          arrival_time: arrival_time,
+          priority: priority,
+          burst: burst,
+        },
       ];
     });
+    setArrival_time("");
+    setPriority("");
+    setBurst("");
+    setNumOfProcesses(numOfProcesses + 1);
   }
 
   return (
@@ -31,13 +39,13 @@ const OSForm = () => {
           <form onSubmit={handleSubmit} className="new-item-form">
             <div className="form-row">
               <div class="mb-6">
-                <label
-                  for="text"
-                  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  Number of processes
-                </label>
                 <div class="grid grid-cols-4 gap-4">
+                  <label
+                    for="text"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white my-auto"
+                  >
+                    Enter new process:
+                  </label>
                   <input
                     type="text"
                     id="arrival_time"
@@ -71,59 +79,48 @@ const OSForm = () => {
             <button
               type="button"
               class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+              onClick={handleSubmit}
             >
               Add
             </button>
-            <ul className="list">
-              {todos.map((todo) => {
-                return (
-                  <li key={todo.id}>
-                    <label
-                      type="checkbox"
-                      checked={todo.completed}
-                      //   onChange={(e) => toggleTodo(todo.id, e.target.checked)}
-                    >
-                      {todo.title}
-                    </label>
-                    {/* <button className="btn btn-danger">Delete</button> */}
-                  </li>
-                );
-              })}
-            </ul>
             <div class="relative overflow-x-auto">
               <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                   <tr>
                     <th scope="col" class="px-6 py-3">
-                      Product name
+                      Process Name
                     </th>
                     <th scope="col" class="px-6 py-3">
-                      Color
+                      Arrival Time
                     </th>
                     <th scope="col" class="px-6 py-3">
-                      Category
+                      Priority
                     </th>
                     <th scope="col" class="px-6 py-3">
-                      Price
+                      Burst
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                    <th
-                      scope="row"
-                      class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                    >
-                      Apple MacBook Pro 17"
-                    </th>
-                    <td class="px-6 py-4">Silver</td>
-                    <td class="px-6 py-4">Laptop</td>
-                    <td class="px-6 py-4">$2999</td>
-                  </tr>
+                  {processes.map((process) => {
+                    return (
+                      <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <th
+                          scope="row"
+                          class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                        >
+                          P{process.id}
+                        </th>
+                        <td class="px-6 py-4">{process.arrival_time}</td>
+                        <td class="px-6 py-4">{process.priority}</td>
+                        <td class="px-6 py-4">{process.burst}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
-            <div className={`grid grid-flow-col grid grid-cols-${3} mt-10`}>
+            <div className={` grid-flow-col grid grid-cols-${3} mt-10`}>
               <div className="bg-slate-50 ">4</div>
               <div className="bg-green-500 ">3</div>
               <div className="bg-slate-50 ">4</div>
