@@ -4,10 +4,17 @@ import { useState } from "react";
 const OSForm = () => {
   const [numOfProcesses, setNumOfProcesses] = useState(1);
   const [processes, setProcesses] = useState([]);
+  const [algorithm, setAlgorithm] = useState("");
 
   const [arrival_time, setArrival_time] = useState([]);
   const [priority, setPriority] = useState([]);
   const [burst, setBurst] = useState([]);
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -117,18 +124,59 @@ const OSForm = () => {
                 </tbody>
               </table>
             </div>
-            <div className={` grid-flow-col grid grid-cols-${3} mt-10`}>
-              <div className="bg-slate-50 ">4</div>
-              <div className="bg-green-500 ">3</div>
-              <div className="bg-slate-50 ">4</div>
+
+            <div className="mt-5">
+              <label
+                for="countries"
+                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Select an algorithm
+              </label>
+              <select
+                id="countries"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                value={algorithm}
+                onChange={(e) => setAlgorithm(e.target.value)}
+              >
+                <option selected>Choose an algorithm</option>
+                <option value="US">FCFS</option>
+                <option value="CA">SJB</option>
+                <option value="FR">Round Robin</option>
+                <option value="DE">Priority</option>
+              </select>
+            </div>
+
+            <div
+              className={` grid-flow-col grid grid-cols-${
+                numOfProcesses - 1
+              } mt-10 h-10`}
+            >
+              {processes.map((process) => {
+                return (
+                  <div
+                    className={`${
+                      process.id % 2 == 0 ? "bg-slate-50" : "bg-green-500"
+                    }`}
+                  ></div>
+                );
+              })}
             </div>
             <hr className="mt-5" />
             <div className={` grid-flow-col grid grid-cols-${3} mt-5`}>
-              <div className="bg-slate-50 ">4</div>
-              <div className="bg-green-500 ">3</div>
-              <div className="bg-slate-50 ">4</div>
-              <div className="bg-green-500 ">3</div>
+              <div className=" text-left text-white mr-2">4</div>
+              <div className=" text-left text-white mr-2">3</div>
+              <div className=" text-left text-white mr-2">3</div>
+              <div className=" text-left text-white">3</div>
             </div>
+
+            {/* <div className="flex flex-wrap gap-4 mt-5 w-full">
+              <div className="bg-slate-50">4</div>
+              <div className="text-center flex items-center">Text A</div>
+              <div className="bg-green-500 ">3</div>
+              <div className="text-center flex items-center">Text B</div>
+              <div className="bg-slate-50 ">4</div>
+              <div className="text-center flex items-center">Text C</div>
+            </div> */}
           </form>
         </div>
       </div>
