@@ -2,9 +2,6 @@ import React from "react";
 import { useState } from "react";
 
 const OSForm = () => {
-  const process = (arrival_time, priority, burst) => {
-    return { arrival_time: arrival_time, priority: priority, burst: burst };
-  };
   const [numOfProcesses, setNumOfProcesses] = useState(1);
   const [processes, setProcesses] = useState([]);
 
