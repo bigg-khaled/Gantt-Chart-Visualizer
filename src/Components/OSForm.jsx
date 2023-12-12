@@ -221,7 +221,7 @@ const OSForm = () => {
                   );
                 })}
             </div>
-            <hr className="mt-5" />
+            {buttonPressed && <hr className="mt-5" />}
             <div className="flex flex-row h-10">
               {waitingTimeArray.map((waitingTime, index) => {
                 const process = processes[index];
