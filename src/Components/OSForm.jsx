@@ -7,7 +7,7 @@ const OSForm = () => {
   const [algorithm, setAlgorithm] = useState("");
   const [totalBurst, setTotalBurst] = useState(0);
   const [buttonPressed, setButtonPressed] = useState(false);
-  let waitingTimeArray = [];
+  const [waitingTimeArray, setWaitingTimeArray] = useState([]);
 
   const [arrival_time, setArrival_time] = useState("");
   const [priority, setPriority] = useState("");
@@ -40,7 +40,6 @@ const OSForm = () => {
 
   const handleAlgorithm = () => {
     setButtonPressed(true);
-
     let waitingTimeArray;
 
     if (algorithm === "FCFS") {
@@ -54,7 +53,7 @@ const OSForm = () => {
         [0]
       ); // Ensure the initial value is [0]
 
-      console.log(waitingTimeArray);
+      setWaitingTimeArray(waitingTimeArray);
       // Do something with the waitingTimeArray, such as updating state or displaying it
     }
   };
@@ -213,27 +212,23 @@ const OSForm = () => {
                 })}
             </div>
             <hr className="mt-5" />
-            <div className="flex flex-row mt-10 h-10">
-              {waitingTimeArray.slice(0, -1).map((waitingTime, index) => {
+            <div className="flex flex-row h-10">
+              {waitingTimeArray.map((waitingTime, index) => {
                 const process = processes[index];
-                console.log("process:", process);
 
                 return (
                   <div
-                    key={index}
-                    className={`${
-                      process.id % 2 === 0 ? "bg-slate-500" : "bg-slate-600"
-                    }`}
-                    style={{
-                      width: `${(process.burst / burstSum()) * 100}%`,
-                    }}
+                    className="text-left text-white "
+                    style={
+                      index !== waitingTimeArray.length - 1
+                        ? { width: `${(process.burst / burstSum()) * 100}%` }
+                        : {}
+                    }
                   >
-                    <p className="">P{process.id}</p>
-                    <p className="">Waiting Time: {waitingTime}</p>
+                    {waitingTime}
                   </div>
                 );
               })}
-              <div className="text-left text-white">9</div>
             </div>
           </form>
         </div>
