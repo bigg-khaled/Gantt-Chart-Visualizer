@@ -188,9 +188,11 @@ const OSForm = () => {
               >
                 <option selected>Choose an algorithm</option>
                 <option value="FCFS">FCFS</option>
-                <option value="SJF">SJF</option>
+                <option value="SJF">SJF-Preemptive</option>
+                <option value="SJF-Non">SJF-NonPreemptive</option>
                 <option value="RR">Round Robin</option>
-                <option value="P">Priority</option>
+                <option value="P-P">Priority-Preemptive</option>
+                <option value="P-NonP">Priority-NonPreemptive</option>
               </select>
             </div>
 
