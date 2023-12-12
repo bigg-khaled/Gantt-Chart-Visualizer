@@ -38,23 +38,32 @@ const OSForm = () => {
     setNumOfProcesses(numOfProcesses + 1);
   };
 
-  const handleAlgorithm = () => {
-    setButtonPressed(true);
+  const handleWaitingTime = () => {
     let waitingTimeArray;
 
-    if (algorithm === "FCFS") {
-      waitingTimeArray = processes.reduce(
-        (accumulator, process) => {
-          const currentWaitingTime =
-            accumulator.length > 0 ? accumulator[accumulator.length - 1] : 0;
-          const newWaitingTime = currentWaitingTime + Number(process.burst);
-          return [...accumulator, newWaitingTime];
-        },
-        [0]
-      ); // Ensure the initial value is [0]
+    waitingTimeArray = processes.reduce(
+      (accumulator, process) => {
+        const currentWaitingTime =
+          accumulator.length > 0 ? accumulator[accumulator.length - 1] : 0;
+        const newWaitingTime = currentWaitingTime + Number(process.burst);
+        return [...accumulator, newWaitingTime];
+      },
+      [0]
+    );
 
-      setWaitingTimeArray(waitingTimeArray);
-      // Do something with the waitingTimeArray, such as updating state or displaying it
+    setWaitingTimeArray(waitingTimeArray);
+  };
+
+  const handleAlgorithm = () => {
+    setButtonPressed(true);
+
+    if (algorithm === "FCFS") {
+      handleWaitingTime();
+    } else if (algorithm === "SJF") {
+      const sortedProcesses = [...processes];
+      sortedProcesses.sort((a, b) => a.burst - b.burst);
+      setProcesses(sortedProcesses);
+      handleWaitingTime();
     }
   };
 
@@ -131,8 +140,10 @@ const OSForm = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {processes.map((process) => {
-                    return (
+                  {processes
+                    .slice()
+                    .sort((a, b) => a.id - b.id)
+                    .map((process) => (
                       <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                         <th
                           scope="row"
@@ -144,8 +155,8 @@ const OSForm = () => {
                         <td class="px-6 py-4">{process.priority}</td>
                         <td class="px-6 py-4">{process.burst}</td>
                       </tr>
-                    );
-                  })}
+                    ))}
+
                   {numOfProcesses == 1 && (
                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                       <td
@@ -177,7 +188,7 @@ const OSForm = () => {
               >
                 <option selected>Choose an algorithm</option>
                 <option value="FCFS">FCFS</option>
-                <option value="SJB">SJB</option>
+                <option value="SJF">SJF</option>
                 <option value="RR">Round Robin</option>
                 <option value="P">Priority</option>
               </select>
@@ -195,12 +206,11 @@ const OSForm = () => {
 
             <div className="flex flex-row mt-10 h-10">
               {buttonPressed &&
-                algorithm == "FCFS" &&
-                processes.map((process) => {
+                processes.map((process, index) => {
                   return (
                     <div
                       className={`${
-                        process.id % 2 == 0 ? "bg-slate-500" : "bg-slate-600"
+                        index % 2 == 0 ? "bg-slate-500" : "bg-slate-600"
                       }`}
                       style={{
                         width: `${(process.burst / burstSum()) * 100}%`,
