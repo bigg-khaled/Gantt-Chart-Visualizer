@@ -5,23 +5,27 @@ const OSForm = () => {
   const [numOfProcesses, setNumOfProcesses] = useState(1);
   const [processes, setProcesses] = useState([]);
   const [algorithm, setAlgorithm] = useState("");
+  const [totalBurst, setTotalBurst] = useState(0);
 
-  const [arrival_time, setArrival_time] = useState([]);
-  const [priority, setPriority] = useState([]);
-  const [burst, setBurst] = useState([]);
+  const [arrival_time, setArrival_time] = useState("");
+  const [priority, setPriority] = useState("");
+  const [burst, setBurst] = useState("");
 
-  const [isOpen, setIsOpen] = useState(false);
-
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
+  const burstSum = () => {
+    return processes.reduce((sum, process) => sum + parseInt(process.burst), 0);
   };
 
-  function handleSubmit(e) {
+  const calculateWaitingTime = (process) => {
+    const newTotalBurst = totalBurst + process.burst;
+    return newTotalBurst;
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     setProcesses((currentProcesses) => {
       return [
-        ...processes,
+        ...currentProcesses,
         {
           id: numOfProcesses,
           arrival_time: arrival_time,
@@ -30,15 +34,21 @@ const OSForm = () => {
         },
       ];
     });
+
     setArrival_time("");
     setPriority("");
     setBurst("");
     setNumOfProcesses(numOfProcesses + 1);
-  }
+  };
+
+  const handleAlgorithm = (e) => {
+    e.preventDefault();
+    console.log(algorithm);
+  };
 
   return (
     <>
-      <div className="bg-slate-800 pt-5 h-screen ">
+      <div className="bg-slate-800 pt-5 min-h-screen max-h-full">
         <div className="w-1/2 flex mx-auto ">
           <form onSubmit={handleSubmit} className="new-item-form">
             <div className="form-row">
@@ -80,13 +90,16 @@ const OSForm = () => {
                 </div>
               </div>
             </div>
-            <button
-              type="button"
-              class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
-              onClick={handleSubmit}
-            >
-              Add
-            </button>
+            <div className="text-right">
+              <button
+                type="button"
+                className="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+                onClick={handleSubmit}
+              >
+                Add
+              </button>
+            </div>
+
             <div class="relative overflow-x-auto">
               <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -121,6 +134,16 @@ const OSForm = () => {
                       </tr>
                     );
                   })}
+                  {numOfProcesses == 1 && (
+                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                      <td
+                        colSpan="4"
+                        className="text-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                      >
+                        No Processes yet
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -139,44 +162,42 @@ const OSForm = () => {
                 onChange={(e) => setAlgorithm(e.target.value)}
               >
                 <option selected>Choose an algorithm</option>
-                <option value="US">FCFS</option>
-                <option value="CA">SJB</option>
-                <option value="FR">Round Robin</option>
-                <option value="DE">Priority</option>
+                <option value="FCFS">FCFS</option>
+                <option value="SJB">SJB</option>
+                <option value="RR">Round Robin</option>
+                <option value="P">Priority</option>
               </select>
             </div>
 
-            <div
-              className={` grid-flow-col grid grid-cols-${
-                numOfProcesses - 1
-              } mt-10 h-10`}
-            >
+            <div className="flex flex-row mt-10 h-10">
               {processes.map((process) => {
                 return (
                   <div
                     className={`${
-                      process.id % 2 == 0 ? "bg-slate-50" : "bg-green-500"
+                      process.id % 2 == 0 ? "bg-slate-500" : "bg-slate-600"
                     }`}
-                  ></div>
+                    style={{ width: `${(process.burst / burstSum()) * 100}%` }}
+                  >
+                    <p className="">P{process.id}</p>
+                  </div>
                 );
               })}
             </div>
             <hr className="mt-5" />
-            <div className={` grid-flow-col grid grid-cols-${3} mt-5`}>
-              <div className=" text-left text-white mr-2">4</div>
-              <div className=" text-left text-white mr-2">3</div>
-              <div className=" text-left text-white mr-2">3</div>
-              <div className=" text-left text-white">3</div>
+            <div className="flex flex-row mt-10 h-10">
+              {processes.map((process) => {
+                const waitingTime = calculateWaitingTime(process);
+                return (
+                  <div
+                    className="text-left text-white"
+                    style={{ width: `${(process.burst / burstSum()) * 100}%` }}
+                  >
+                    {waitingTime}
+                  </div>
+                );
+              })}
+              <div className="text-left text-white">9</div>
             </div>
-
-            {/* <div className="flex flex-wrap gap-4 mt-5 w-full">
-              <div className="bg-slate-50">4</div>
-              <div className="text-center flex items-center">Text A</div>
-              <div className="bg-green-500 ">3</div>
-              <div className="text-center flex items-center">Text B</div>
-              <div className="bg-slate-50 ">4</div>
-              <div className="text-center flex items-center">Text C</div>
-            </div> */}
           </form>
         </div>
       </div>
