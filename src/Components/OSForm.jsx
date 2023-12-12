@@ -6,6 +6,8 @@ const OSForm = () => {
   const [processes, setProcesses] = useState([]);
   const [algorithm, setAlgorithm] = useState("");
   const [totalBurst, setTotalBurst] = useState(0);
+  const [buttonPressed, setButtonPressed] = useState(false);
+  let waitingTimeArray = [];
 
   const [arrival_time, setArrival_time] = useState("");
   const [priority, setPriority] = useState("");
@@ -13,11 +15,6 @@ const OSForm = () => {
 
   const burstSum = () => {
     return processes.reduce((sum, process) => sum + parseInt(process.burst), 0);
-  };
-
-  const calculateWaitingTime = (process) => {
-    const newTotalBurst = totalBurst + process.burst;
-    return newTotalBurst;
   };
 
   const handleSubmit = (e) => {
@@ -41,9 +38,25 @@ const OSForm = () => {
     setNumOfProcesses(numOfProcesses + 1);
   };
 
-  const handleAlgorithm = (e) => {
-    e.preventDefault();
-    console.log(algorithm);
+  const handleAlgorithm = () => {
+    setButtonPressed(true);
+
+    let waitingTimeArray;
+
+    if (algorithm === "FCFS") {
+      waitingTimeArray = processes.reduce(
+        (accumulator, process) => {
+          const currentWaitingTime =
+            accumulator.length > 0 ? accumulator[accumulator.length - 1] : 0;
+          const newWaitingTime = currentWaitingTime + Number(process.burst);
+          return [...accumulator, newWaitingTime];
+        },
+        [0]
+      ); // Ensure the initial value is [0]
+
+      console.log(waitingTimeArray);
+      // Do something with the waitingTimeArray, such as updating state or displaying it
+    }
   };
 
   return (
@@ -159,7 +172,9 @@ const OSForm = () => {
                 id="countries"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 value={algorithm}
-                onChange={(e) => setAlgorithm(e.target.value)}
+                onChange={(e) => {
+                  setAlgorithm(e.target.value);
+                }}
               >
                 <option selected>Choose an algorithm</option>
                 <option value="FCFS">FCFS</option>
@@ -169,30 +184,52 @@ const OSForm = () => {
               </select>
             </div>
 
+            <div className="text-right mt-5">
+              <button
+                type="button"
+                className="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+                onClick={handleAlgorithm}
+              >
+                Generate
+              </button>
+            </div>
+
             <div className="flex flex-row mt-10 h-10">
-              {processes.map((process) => {
-                return (
-                  <div
-                    className={`${
-                      process.id % 2 == 0 ? "bg-slate-500" : "bg-slate-600"
-                    }`}
-                    style={{ width: `${(process.burst / burstSum()) * 100}%` }}
-                  >
-                    <p className="">P{process.id}</p>
-                  </div>
-                );
-              })}
+              {buttonPressed &&
+                algorithm == "FCFS" &&
+                processes.map((process) => {
+                  return (
+                    <div
+                      className={`${
+                        process.id % 2 == 0 ? "bg-slate-500" : "bg-slate-600"
+                      }`}
+                      style={{
+                        width: `${(process.burst / burstSum()) * 100}%`,
+                      }}
+                    >
+                      <p className="">P{process.id}</p>
+                    </div>
+                  );
+                })}
             </div>
             <hr className="mt-5" />
             <div className="flex flex-row mt-10 h-10">
-              {processes.map((process) => {
-                const waitingTime = calculateWaitingTime(process);
+              {waitingTimeArray.slice(0, -1).map((waitingTime, index) => {
+                const process = processes[index];
+                console.log("process:", process);
+
                 return (
                   <div
-                    className="text-left text-white"
-                    style={{ width: `${(process.burst / burstSum()) * 100}%` }}
+                    key={index}
+                    className={`${
+                      process.id % 2 === 0 ? "bg-slate-500" : "bg-slate-600"
+                    }`}
+                    style={{
+                      width: `${(process.burst / burstSum()) * 100}%`,
+                    }}
                   >
-                    {waitingTime}
+                    <p className="">P{process.id}</p>
+                    <p className="">Waiting Time: {waitingTime}</p>
                   </div>
                 );
               })}
