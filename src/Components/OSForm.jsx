@@ -50,6 +50,7 @@ const OSForm = () => {
       },
       [0]
     );
+    const handleBurstTime = () => {};
 
     setWaitingTimeArray(waitingTimeArray);
   };
@@ -64,7 +65,7 @@ const OSForm = () => {
       sortedProcesses.sort((a, b) => a.burst - b.burst);
       setProcesses(sortedProcesses);
       handleWaitingTime();
-    } else if (algorithm === "P-P") {
+    } else if (algorithm === "P-NonP") {
       const sortedProcesses = [...processes];
       sortedProcesses.sort((a, b) => b.priority - a.priority);
       setProcesses(sortedProcesses);
