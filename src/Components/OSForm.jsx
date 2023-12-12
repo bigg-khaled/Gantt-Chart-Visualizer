@@ -64,6 +64,11 @@ const OSForm = () => {
       sortedProcesses.sort((a, b) => a.burst - b.burst);
       setProcesses(sortedProcesses);
       handleWaitingTime();
+    } else if (algorithm === "P-P") {
+      const sortedProcesses = [...processes];
+      sortedProcesses.sort((a, b) => b.priority - a.priority);
+      setProcesses(sortedProcesses);
+      handleWaitingTime();
     }
   };
 
