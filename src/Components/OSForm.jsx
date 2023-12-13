@@ -69,7 +69,6 @@ const OSForm = () => {
       const sortedProcesses = [...processes].sort(
         (a, b) => b.priority - a.priority
       );
-
       setProcesses(sortedProcesses);
       handleWaitingTime();
     }
