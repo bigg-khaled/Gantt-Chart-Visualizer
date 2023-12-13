@@ -1,5 +1,5 @@
 import React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const OSForm = () => {
   const [numOfProcesses, setNumOfProcesses] = useState(1);
@@ -39,9 +39,9 @@ const OSForm = () => {
   };
 
   const handleWaitingTime = () => {
-    let waitingTimeArray;
+    let waitingTimeArrayTemp = [];
 
-    waitingTimeArray = processes.reduce(
+    waitingTimeArrayTemp = processes.reduce(
       (accumulator, process) => {
         const currentWaitingTime =
           accumulator.length > 0 ? accumulator[accumulator.length - 1] : 0;
@@ -50,9 +50,7 @@ const OSForm = () => {
       },
       [0]
     );
-    const handleBurstTime = () => {};
-
-    setWaitingTimeArray(waitingTimeArray);
+    setWaitingTimeArray(waitingTimeArrayTemp);
   };
 
   const handleAlgorithm = () => {
@@ -65,15 +63,22 @@ const OSForm = () => {
       sortedProcesses.sort((a, b) => a.burst - b.burst);
       setProcesses(sortedProcesses);
       handleWaitingTime();
+      console.log("handled waiting time: ", waitingTimeArray);
     } else if (algorithm === "P-NonP") {
       const sortedProcesses = [...processes].sort(
         (a, b) => b.priority - a.priority
       );
-
       setProcesses(sortedProcesses);
       handleWaitingTime();
+      console.log("handled waiting time: ", waitingTimeArray);
     }
   };
+
+  useEffect(() => {
+    if (buttonPressed) {
+      handleWaitingTime();
+    }
+  }, [waitingTimeArray, buttonPressed]);
 
   return (
     <>
@@ -197,10 +202,10 @@ const OSForm = () => {
                 <option selected>Choose an algorithm</option>
                 <option value="FCFS">FCFS</option>
                 <option value="SJF">SJF-Preemptive</option>
-                <option value="SJF-Non">SJF-NonPreemptive</option>
+                <option value="SJF-Non">SJF Non-Preemptive</option>
                 <option value="RR">Round Robin</option>
-                <option value="P-P">Priority-Preemptive</option>
-                <option value="P-NonP">Priority-NonPreemptive</option>
+                <option value="P-P">Priority Preemptive</option>
+                <option value="P-NonP">Priority Non-Preemptive</option>
               </select>
             </div>
 
@@ -208,7 +213,9 @@ const OSForm = () => {
               <button
                 type="button"
                 className="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
-                onClick={handleAlgorithm}
+                onClick={() => {
+                  handleAlgorithm();
+                }}
               >
                 Generate
               </button>
