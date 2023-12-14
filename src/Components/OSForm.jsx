@@ -5,7 +5,6 @@ const OSForm = () => {
   const [numOfProcesses, setNumOfProcesses] = useState(1);
   const [processes, setProcesses] = useState([]);
   const [algorithm, setAlgorithm] = useState("");
-  const [totalBurst, setTotalBurst] = useState(0);
   const [buttonPressed, setButtonPressed] = useState(false);
   const [waitingTimeArray, setWaitingTimeArray] = useState([]);
 
@@ -39,14 +38,14 @@ const OSForm = () => {
   };
 
   const handleReset = () => {
+    setButtonPressed(false);
     setProcesses([]);
     setNumOfProcesses(1);
+    setWaitingTimeArray([]);
     setArrival_time("");
     setPriority("");
     setBurst("");
     setAlgorithm("");
-    setButtonPressed(false);
-    setWaitingTimeArray([]);
   };
 
   const handleWaitingTime = () => {
@@ -55,11 +54,13 @@ const OSForm = () => {
     waitingTimeArrayTemp = processes.reduce(
       (accumulator, process) => {
         const currentWaitingTime =
-          accumulator.length > 0 ? accumulator[accumulator.length - 1] : 0;
+          accumulator.length > 0
+            ? accumulator[accumulator.length - 1]
+            : processes[0].arrival_time;
         const newWaitingTime = currentWaitingTime + Number(process.burst);
         return [...accumulator, newWaitingTime];
       },
-      [0]
+      [Number(processes[0].arrival_time)]
     );
     setWaitingTimeArray(waitingTimeArrayTemp);
   };
@@ -68,18 +69,112 @@ const OSForm = () => {
     setButtonPressed(true);
 
     if (algorithm === "FCFS") {
-    } else if (algorithm === "SJF") {
       const sortedProcesses = [...processes];
-      sortedProcesses.sort((a, b) => a.burst - b.burst);
+      sortedProcesses.sort((a, b) => a.arrival_time - b.arrival_time);
       setProcesses(sortedProcesses);
-      console.log("handled waiting time: ", waitingTimeArray);
-    } else if (algorithm === "P-NonP") {
+    } else if (algorithm === "SJF-P") {
+      runSJF_P();
+      console.log("Processes at handleAlgorithm is ", processes);
+    } else if (algorithm === "P-NP") {
       const sortedProcesses = [...processes].sort(
         (a, b) => b.priority - a.priority
       );
       setProcesses(sortedProcesses);
-      console.log("handled waiting time: ", waitingTimeArray);
     }
+  };
+
+  const runSJF_P = () => {
+    let minArrivalTimeProcess = Math.min(
+      ...processes.map((process) => Number(process.arrival_time))
+    );
+
+    const burstTotal = processes.reduce(
+      (sum, process) => sum + Number(process.burst),
+      0
+    );
+    const minArrivalTime = Math.min(
+      ...processes.map((process) => Number(process.arrival_time))
+    );
+
+    let maxArrivalTimeProcess = burstTotal + minArrivalTime;
+
+    let queuedProcesses = [];
+    let organizedProcesses = [];
+    let totalBurstTime = Number(minArrivalTimeProcess);
+
+    console.log("min", minArrivalTimeProcess);
+    console.log("max", maxArrivalTimeProcess);
+
+    console.log("start for loop");
+    for (
+      let t = Number(minArrivalTimeProcess);
+      t <= Number(maxArrivalTimeProcess);
+      t++
+    ) {
+      console.log("Increment", t);
+
+      //find index of first process with arrival time == t
+      const foundProcesses = processes.filter(
+        (process) => Number(process.arrival_time) === t
+      );
+
+      if (foundProcesses.length > 0) {
+        console.log("Processes found at", t);
+        console.log("The found objects are", foundProcesses);
+
+        for (let x = 0; x < queuedProcesses.length; x++) {
+          console.log("queuedProcess before", x, " ", queuedProcesses[x]);
+        }
+
+        queuedProcesses.push(...foundProcesses);
+
+        for (let x = 0; x < queuedProcesses.length; x++) {
+          console.log("queuedProcess after", x, " ", queuedProcesses[x]);
+        }
+      }
+
+      console.log("Total burst time at if is", totalBurstTime);
+      console.log("t is", t);
+      console.log(queuedProcesses.length);
+
+      if (totalBurstTime === t && queuedProcesses.length > 0) {
+        console.log("found burst overlap", queuedProcesses[0]);
+        for (let x = 0; x < queuedProcesses.length; x++) {
+          console.log("queuedProcess in if ", x, " ", queuedProcesses[x]);
+        }
+        for (let x = 0; x < organizedProcesses.length; x++) {
+          console.log(
+            "Organized processes in if",
+            x,
+            " ",
+            organizedProcesses[x]
+          );
+        }
+        //sort queuedProcesses by burst time
+        queuedProcesses.sort((a, b) => a.burst - b.burst);
+        //add to organizedProcesses
+        organizedProcesses.push(queuedProcesses[0]);
+
+        totalBurstTime += Number(queuedProcesses[0].burst);
+        //remove from queuedProcesses
+        queuedProcesses.shift();
+        console.log("finished adding queue");
+      }
+
+      for (let x = 0; x < organizedProcesses.length; x++) {
+        console.log(
+          "Organized processes at end",
+          x,
+          "for increment ",
+          t,
+          " ",
+          organizedProcesses[x]
+        );
+      }
+    }
+    setProcesses(organizedProcesses);
+    console.log("organized", organizedProcesses);
+    console.log("processes", processes);
   };
 
   const handleKeyDown = (e) => {
@@ -147,15 +242,13 @@ const OSForm = () => {
               >
                 Reset
               </button>
-              <div className="text-right">
-                <button
-                  type="button"
-                  className="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
-                  onClick={handleSubmit}
-                >
-                  Add
-                </button>
-              </div>
+              <button
+                type="button"
+                className="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+                onClick={handleSubmit}
+              >
+                Add
+              </button>
             </div>
 
             <div class="relative overflow-x-auto">
@@ -225,11 +318,11 @@ const OSForm = () => {
               >
                 <option selected>Choose an algorithm</option>
                 <option value="FCFS">FCFS</option>
-                <option value="SJF">SJF-Preemptive</option>
-                <option value="SJF-Non">SJF Non-Preemptive</option>
+                <option value="SJF-P">SJF Preemptive</option>
+                <option value="SJF-NP">SJF Non-Preemptive</option>
                 <option value="RR">Round Robin</option>
                 <option value="P-P">Priority Preemptive</option>
-                <option value="P-NonP">Priority Non-Preemptive</option>
+                <option value="P-NP">Priority Non-Preemptive</option>
               </select>
             </div>
 
