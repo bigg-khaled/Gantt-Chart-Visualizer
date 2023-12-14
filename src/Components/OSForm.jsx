@@ -72,18 +72,16 @@ const OSForm = () => {
       const sortedProcesses = [...processes];
       sortedProcesses.sort((a, b) => a.arrival_time - b.arrival_time);
       setProcesses(sortedProcesses);
-    } else if (algorithm === "SJF-P") {
-      runSJF_P();
+    } else if (algorithm === "SJF-NP") {
+      runSJF_NP();
       console.log("Processes at handleAlgorithm is ", processes);
     } else if (algorithm === "P-NP") {
-      const sortedProcesses = [...processes].sort(
-        (a, b) => b.priority - a.priority
-      );
-      setProcesses(sortedProcesses);
+      runPriority_NP();
+    } else if (algorithm === "SJF-P") {
     }
   };
 
-  const runSJF_P = () => {
+  const runSJF_NP = () => {
     let minArrivalTimeProcess = Math.min(
       ...processes.map((process) => Number(process.arrival_time))
     );
@@ -102,54 +100,21 @@ const OSForm = () => {
     let organizedProcesses = [];
     let totalBurstTime = Number(minArrivalTimeProcess);
 
-    console.log("min", minArrivalTimeProcess);
-    console.log("max", maxArrivalTimeProcess);
-
-    console.log("start for loop");
     for (
       let t = Number(minArrivalTimeProcess);
       t <= Number(maxArrivalTimeProcess);
       t++
     ) {
-      console.log("Increment", t);
-
       //find index of first process with arrival time == t
       const foundProcesses = processes.filter(
         (process) => Number(process.arrival_time) === t
       );
 
       if (foundProcesses.length > 0) {
-        console.log("Processes found at", t);
-        console.log("The found objects are", foundProcesses);
-
-        for (let x = 0; x < queuedProcesses.length; x++) {
-          console.log("queuedProcess before", x, " ", queuedProcesses[x]);
-        }
-
         queuedProcesses.push(...foundProcesses);
-
-        for (let x = 0; x < queuedProcesses.length; x++) {
-          console.log("queuedProcess after", x, " ", queuedProcesses[x]);
-        }
       }
 
-      console.log("Total burst time at if is", totalBurstTime);
-      console.log("t is", t);
-      console.log(queuedProcesses.length);
-
       if (totalBurstTime === t && queuedProcesses.length > 0) {
-        console.log("found burst overlap", queuedProcesses[0]);
-        for (let x = 0; x < queuedProcesses.length; x++) {
-          console.log("queuedProcess in if ", x, " ", queuedProcesses[x]);
-        }
-        for (let x = 0; x < organizedProcesses.length; x++) {
-          console.log(
-            "Organized processes in if",
-            x,
-            " ",
-            organizedProcesses[x]
-          );
-        }
         //sort queuedProcesses by burst time
         queuedProcesses.sort((a, b) => a.burst - b.burst);
         //add to organizedProcesses
@@ -158,23 +123,41 @@ const OSForm = () => {
         totalBurstTime += Number(queuedProcesses[0].burst);
         //remove from queuedProcesses
         queuedProcesses.shift();
-        console.log("finished adding queue");
-      }
-
-      for (let x = 0; x < organizedProcesses.length; x++) {
-        console.log(
-          "Organized processes at end",
-          x,
-          "for increment ",
-          t,
-          " ",
-          organizedProcesses[x]
-        );
       }
     }
     setProcesses(organizedProcesses);
-    console.log("organized", organizedProcesses);
-    console.log("processes", processes);
+  };
+  const runPriority_NP = () => {
+    // Assuming processes is an array of objects with properties: process_id, priority, arrival_time, and burst_time
+
+    // Sort processes by priority (lower number means higher priority)
+    processes.sort((a, b) => a.priority - b.priority);
+
+    let completionTime = 0;
+    let turnaroundTimes = [];
+    let waitingTimes = [];
+    let responseTimes = [];
+
+    processes.forEach((process) => {
+      completionTime += process.burst_time;
+      turnaroundTimes.push(completionTime - process.arrival_time);
+      waitingTimes.push(
+        turnaroundTimes[turnaroundTimes.length - 1] - process.burst_time
+      );
+      responseTimes.push(
+        waitingTimes[waitingTimes.length - 1] - process.arrival_time
+      );
+    });
+
+    // Display results
+    console.log(
+      "Process\tPriority\tArrival Time\tBurst Time\tCompletion Time\tTurnaround Time\tWaiting Time\tResponse Time"
+    );
+    processes.forEach((process, index) => {
+      console.log(
+        `${process.process_id}\t${process.priority}\t\t${process.arrival_time}\t\t${process.burst_time}\t\t${completionTime}\t\t${turnaroundTimes[index]}\t\t${waitingTimes[index]}\t\t${responseTimes[index]}`
+      );
+    });
   };
 
   const handleKeyDown = (e) => {
