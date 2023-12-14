@@ -253,22 +253,23 @@ const OSForm = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {processes
-                    .slice()
-                    .sort((a, b) => a.id - b.id)
-                    .map((process) => (
-                      <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                        <th
-                          scope="row"
-                          class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                        >
-                          P{process.id}
-                        </th>
-                        <td class="px-6 py-4">{process.arrival_time}</td>
-                        <td class="px-6 py-4">{process.priority}</td>
-                        <td class="px-6 py-4">{process.burst}</td>
-                      </tr>
-                    ))}
+                  {numOfProcesses > 1 &&
+                    processes
+                      .slice()
+                      .sort((a, b) => a.id - b.id)
+                      .map((process) => (
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                          <th
+                            scope="row"
+                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                          >
+                            P{process.id}
+                          </th>
+                          <td class="px-6 py-4">{process.arrival_time}</td>
+                          <td class="px-6 py-4">{process.priority}</td>
+                          <td class="px-6 py-4">{process.burst}</td>
+                        </tr>
+                      ))}
 
                   {numOfProcesses == 1 && (
                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
@@ -323,6 +324,7 @@ const OSForm = () => {
 
             <div className="flex flex-row mt-10 h-10">
               {buttonPressed &&
+                numOfProcesses > 1 &&
                 processes.map((process, index) => {
                   return (
                     <div
@@ -340,22 +342,24 @@ const OSForm = () => {
             </div>
             {buttonPressed && <hr className="mt-5" />}
             <div className="flex flex-row h-10">
-              {waitingTimeArray.map((waitingTime, index) => {
-                const process = processes[index];
+              {numOfProcesses > 1 &&
+                buttonPressed &&
+                waitingTimeArray.map((waitingTime, index) => {
+                  const process = processes[index];
 
-                return (
-                  <div
-                    className="text-left text-white "
-                    style={
-                      index !== waitingTimeArray.length - 1
-                        ? { width: `${(process.burst / burstSum()) * 100}%` }
-                        : {}
-                    }
-                  >
-                    {waitingTime}
-                  </div>
-                );
-              })}
+                  return (
+                    <div
+                      className="text-left text-white "
+                      style={
+                        index !== waitingTimeArray.length - 1
+                          ? { width: `${(process.burst / burstSum()) * 100}%` }
+                          : {}
+                      }
+                    >
+                      {waitingTime}
+                    </div>
+                  );
+                })}
             </div>
           </form>
         </div>
