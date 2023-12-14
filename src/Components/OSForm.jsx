@@ -7,6 +7,7 @@ const OSForm = () => {
   const [algorithm, setAlgorithm] = useState("");
   const [buttonPressed, setButtonPressed] = useState(false);
   const [waitingTimeArray, setWaitingTimeArray] = useState([]);
+  const processedIds = new Set();
 
   const [arrival_time, setArrival_time] = useState("");
   const [priority, setPriority] = useState("");
@@ -78,6 +79,7 @@ const OSForm = () => {
     } else if (algorithm === "P-NP") {
       runPriority_NP();
     } else if (algorithm === "SJF-P") {
+      runSJF_P();
     }
   };
 
@@ -158,6 +160,102 @@ const OSForm = () => {
         `${process.process_id}\t${process.priority}\t\t${process.arrival_time}\t\t${process.burst_time}\t\t${completionTime}\t\t${turnaroundTimes[index]}\t\t${waitingTimes[index]}\t\t${responseTimes[index]}`
       );
     });
+  };
+  const runSJF_P = () => {
+    let processesCopy = processes.map((process) => ({
+      ...process,
+      remainingBurstTime: Number(process.burst),
+    }));
+
+    for (let i = 0; i < processesCopy.length; i++) {
+      console.log("processesCopy", i, processesCopy[i]);
+    }
+
+    let minArrivalTimeProcess = Math.min(
+      ...processesCopy.map((process) => Number(process.arrival_time))
+    );
+
+    const burstTotal = processesCopy.reduce(
+      (sum, process) => sum + Number(process.burst),
+      0
+    );
+    const minArrivalTime = Math.min(
+      ...processesCopy.map((process) => Number(process.arrival_time))
+    );
+
+    let maxArrivalTimeProcess = burstTotal + minArrivalTime;
+
+    let queuedProcesses = [];
+    let organizedProcesses = [];
+    let totalBurstTime = Number(minArrivalTimeProcess);
+
+    for (
+      let t = Number(minArrivalTimeProcess);
+      t <= Number(maxArrivalTimeProcess);
+      t++
+    ) {
+      console.log("t", t);
+      //find index of first process with arrival time == t
+      const foundProcesses = processesCopy.filter(
+        (process) => Number(process.arrival_time) === t
+      );
+
+      if (foundProcesses.length > 0) {
+        queuedProcesses.push(...foundProcesses);
+      }
+
+      if (queuedProcesses.length > 0) {
+        //sort queuedProcesses by burst time
+        queuedProcesses.sort(
+          (a, b) => a.remainingBurstTime - b.remainingBurstTime
+        );
+
+        //add to organizedProcesses
+        organizedProcesses.push(queuedProcesses[0]);
+
+        for (let i = 0; i < organizedProcesses.length; i++) {
+          console.log("organized process", i, organizedProcesses[i]);
+        }
+        for (let i = 0; i < queuedProcesses.length; i++) {
+          console.log("queued process", i, queuedProcesses[i]);
+        }
+        totalBurstTime += 1;
+        //remove from queuedProcesses
+        if (queuedProcesses[0].remainingBurstTime > 1) {
+          queuedProcesses[0].remainingBurstTime -= 1;
+        } else {
+          queuedProcesses.shift();
+        }
+      }
+    }
+
+    let finalProcesses = [];
+
+    let currentProcess = organizedProcesses[0];
+    currentProcess.burst = 1;
+
+    for (let i = 1; i < organizedProcesses.length; i++) {
+      const current = organizedProcesses[i];
+      const previous = organizedProcesses[i - 1];
+
+      if (
+        current.id === previous.id &&
+        current.arrival_time === previous.arrival_time &&
+        current.priority === previous.priority
+      ) {
+        // Consecutive duplicate, update burst
+        currentProcess.burst += 1;
+      } else {
+        // Not a consecutive duplicate, push the current process and start a new one
+        finalProcesses.push({ ...currentProcess });
+        currentProcess = { ...current };
+        currentProcess.burst = 1;
+      }
+    }
+
+    // Push the last process
+    finalProcesses.push({ ...currentProcess });
+    setProcesses(finalProcesses);
   };
 
   const handleKeyDown = (e) => {
@@ -256,20 +354,29 @@ const OSForm = () => {
                   {numOfProcesses > 1 &&
                     processes
                       .slice()
-                      .sort((a, b) => a.id - b.id)
-                      .map((process) => (
-                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                          <th
-                            scope="row"
-                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                          >
-                            P{process.id}
-                          </th>
-                          <td class="px-6 py-4">{process.arrival_time}</td>
-                          <td class="px-6 py-4">{process.priority}</td>
-                          <td class="px-6 py-4">{process.burst}</td>
-                        </tr>
-                      ))}
+                      .sort((a, b) => a.id - b.id) // Sort the processes by id
+                      .map((process) => {
+                        if (!processedIds.has(process.id)) {
+                          processedIds.add(process.id);
+                          return (
+                            <tr
+                              key={process.id} // Ensure each element has a unique key
+                              class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                            >
+                              <th
+                                scope="row"
+                                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                              >
+                                P{process.id}
+                              </th>
+                              <td class="px-6 py-4">{process.arrival_time}</td>
+                              <td class="px-6 py-4">{process.priority}</td>
+                              <td class="px-6 py-4">{process.burst}</td>
+                            </tr>
+                          );
+                        }
+                        return null; // Skip rendering for duplicate ids
+                      })}
 
                   {numOfProcesses == 1 && (
                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
