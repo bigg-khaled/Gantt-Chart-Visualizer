@@ -693,6 +693,15 @@ const OSForm = () => {
                   );
                 })}
             </div>
+
+            <div className="justify-start text-align-left">
+              <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white my-auto">
+                Average Turnaround Time: {finalAvgTAT}
+              </label>
+              <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white my-auto">
+                Average Waiting Time: {finalAvgWT}
+              </label>
+            </div>
           </form>
         </div>
       </div>
