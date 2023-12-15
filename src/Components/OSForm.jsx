@@ -356,15 +356,32 @@ const OSForm = () => {
 
     while (queuedProcesses.length > 0) {
       if (queuedProcesses[counter].remainingBurstTime - timeQuantum <= 0) {
-        queuedProcesses[counter].burst =
-          queuedProcesses[counter].burst % timeQuantum || timeQuantum;
-        organizedProcesses.push(queuedProcesses[counter]);
-        queuedProcesses.splice(counter, 1);
+        if (
+          queuedProcesses[counter].id ===
+          organizedProcesses[organizedProcesses.length - 1]?.id
+        ) {
+          organizedProcesses[organizedProcesses.length - 1].burst +=
+            queuedProcesses[counter].burst % timeQuantum || timeQuantum;
+          queuedProcesses.splice(counter, 1);
+        } else {
+          queuedProcesses[counter].burst =
+            queuedProcesses[counter].burst % timeQuantum || timeQuantum;
+          organizedProcesses.push(queuedProcesses[counter]);
+          queuedProcesses.splice(counter, 1);
+        }
       } else {
-        queuedProcesses[counter].remainingBurstTime -= timeQuantum;
-        const pushedProcess = { ...queuedProcesses[counter] };
-        pushedProcess.burst = timeQuantum;
-        organizedProcesses.push(pushedProcess);
+        if (
+          queuedProcesses[counter].id ===
+          organizedProcesses[organizedProcesses.length - 1]?.id
+        ) {
+          organizedProcesses[organizedProcesses.length - 1].burst +=
+            timeQuantum;
+        } else {
+          queuedProcesses[counter].remainingBurstTime -= timeQuantum;
+          const pushedProcess = { ...queuedProcesses[counter] };
+          pushedProcess.burst = timeQuantum;
+          organizedProcesses.push(pushedProcess);
+        }
         counter++;
       }
       if (counter > queuedProcesses.length - 1) {
