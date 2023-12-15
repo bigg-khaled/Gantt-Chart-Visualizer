@@ -694,12 +694,12 @@ const OSForm = () => {
                 })}
             </div>
 
-            <div className="justify-start text-align-left">
+            <div className="justify-start text-left">
               <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white my-auto">
-                Average Turnaround Time: {finalAvgTAT}
+                Average Turnaround Time: {finalAvgTAT.toPrecision(2)}
               </label>
               <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white my-auto">
-                Average Waiting Time: {finalAvgWT}
+                Average Waiting Time: {finalAvgWT.toPrecision(2)}
               </label>
             </div>
           </form>
