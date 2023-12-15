@@ -14,6 +14,7 @@ const OSForm = () => {
   const [burst, setBurst] = useState("");
   const [finalAvgTAT, setFinalAvgTAT] = useState(0);
   const [finalAvgWT, setFinalAvgWT] = useState(0);
+  const [RRTimeQuantum, setRRTimeQuantum] = useState("");
 
   const burstSum = () => {
     return processes.reduce((sum, process) => sum + parseInt(process.burst), 0);
@@ -90,7 +91,7 @@ const OSForm = () => {
     } else if (algorithm === "P-P") {
       runPriority_P();
     } else if (algorithm === "RR") {
-      runRoundRobin(5);
+      runRoundRobin(Number(RRTimeQuantum));
     }
     handleINFO();
   };
@@ -450,14 +451,22 @@ const OSForm = () => {
   const handleINFO = () => {
     for (let i = 0; i < processes.length; i++) {
       let totalBurst = 0;
+      let isRepeated = false;
       for (let j = 0; j <= i; j++) {
         totalBurst += processes[j].burst;
       }
       totalBurst += processes[0].arrival_time;
-
-      processes[i].turnaroundTime = totalBurst - processes[i].arrival_time;
-      processes[i].waitingTime =
-        processes[i].turnaroundTime - processes[i].burst;
+      // Make an if condition that the next 2 lines only happen if the process id is the last repeatition of itself
+      for (let x = i + 1; x < processes.length; x++) {
+        if (processes[i].id === processes[x].id) {
+          isRepeated = true;
+        }
+      }
+      if (!isRepeated) {
+        processes[i].turnaroundTime = totalBurst - processes[i].arrival_time;
+        processes[i].waitingTime =
+          processes[i].turnaroundTime - processes[i].burst;
+      }
     }
     let avgWT = 0;
     let avgTAT = 0;
@@ -468,10 +477,10 @@ const OSForm = () => {
       avgWT += processes[i].waitingTime;
     }
 
-    avgTAT = avgTAT / processes.length;
+    avgTAT = avgTAT / getUniqueProcesses(processes).length;
     setFinalAvgTAT(avgTAT);
 
-    avgWT = avgWT / processes.length;
+    avgWT = avgWT / getUniqueProcesses(processes).length;
     setFinalAvgWT(avgWT);
   };
 
@@ -480,6 +489,16 @@ const OSForm = () => {
       handleSubmit(e);
     }
   };
+
+  function getUniqueProcesses(processes) {
+    const uniqueProcessesMap = new Map();
+
+    processes.forEach((process) => {
+      uniqueProcessesMap.set(process.id, process);
+    });
+
+    return Array.from(uniqueProcessesMap.values());
+  }
 
   useEffect(() => {
     if (buttonPressed) {
@@ -573,35 +592,30 @@ const OSForm = () => {
                 </thead>
                 <tbody>
                   {numOfProcesses > 1 &&
-                    processes
-                      .slice()
-                      .sort((a, b) => a.id - b.id) // Sort the processes by id
-                      .map((process) => {
-                        if (!processedIds.has(process.id)) {
-                          processedIds.add(process.id);
-                          return (
-                            <tr
-                              key={process.id} // Ensure each element has a unique key
-                              class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                    processes.map((process) => {
+                      {
+                        processedIds.add(process.id);
+                        return (
+                          <tr
+                            key={process.id} // Ensure each element has a unique key
+                            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                          >
+                            <th
+                              scope="row"
+                              class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                             >
-                              <th
-                                scope="row"
-                                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                              >
-                                P{process.id}
-                              </th>
-                              <td class="px-6 py-4">{process.arrival_time}</td>
-                              <td class="px-6 py-4">{process.priority}</td>
-                              <td class="px-6 py-4">{process.burst}</td>
-                              <td class="px-6 py-4">
-                                {process.turnaroundTime}
-                              </td>
-                              <td class="px-6 py-4">{process.waitingTime}</td>
-                            </tr>
-                          );
-                        }
-                        return null; // Skip rendering for duplicate ids
-                      })}
+                              P{process.id}
+                            </th>
+                            <td class="px-6 py-4">{process.arrival_time}</td>
+                            <td class="px-6 py-4">{process.priority}</td>
+                            <td class="px-6 py-4">{process.burst}</td>
+                            <td class="px-6 py-4">{process.turnaroundTime}</td>
+                            <td class="px-6 py-4">{process.waitingTime}</td>
+                          </tr>
+                        );
+                      }
+                      return null; // Skip rendering for duplicate ids
+                    })}
 
                   {numOfProcesses == 1 && (
                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
@@ -640,6 +654,25 @@ const OSForm = () => {
                 <option value="P-NP">Priority Non-Preemptive</option>
               </select>
             </div>
+            {algorithm === "RR" && (
+              <div className="flex mt-5">
+                <label
+                  className="block mb-2 mr-3 text-sm font-medium text-gray-900 dark:text-white my-auto"
+                  style={{ whiteSpace: "nowrap" }}
+                >
+                  Enter time quantum:
+                </label>
+                <input
+                  type="text"
+                  id="time_quantum"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  placeholder="Time Quantum"
+                  value={RRTimeQuantum}
+                  onChange={(e) => setRRTimeQuantum(e.target.value)}
+                  required
+                />
+              </div>
+            )}
 
             <div className="text-right mt-5">
               <button
