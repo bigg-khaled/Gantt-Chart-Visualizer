@@ -82,6 +82,8 @@ const OSForm = () => {
       runSJF_P();
     } else if (algorithm === "P-P") {
       runPriority_P();
+    } else if (algorithm === "RR") {
+      runRoundRobin(5);
     }
   };
 
@@ -349,6 +351,83 @@ const OSForm = () => {
     // Push the last process
     finalProcesses.push({ ...currentProcess });
     setProcesses(finalProcesses);
+  };
+  const runRoundRobin = (timeQuantum) => {
+    let processesCopy = processes.map((process) => ({
+      ...process,
+      remainingBurstTime: Number(process.burst),
+    }));
+
+    let minArrivalTimeProcess = Math.min(
+      ...processesCopy.map((process) => Number(process.arrival_time))
+    );
+
+    const burstTotal = processesCopy.reduce(
+      (sum, process) => sum + Number(process.burst),
+      0
+    );
+    const minArrivalTime = Math.min(
+      ...processesCopy.map((process) => Number(process.arrival_time))
+    );
+
+    let maxArrivalTimeProcess = burstTotal + minArrivalTime;
+
+    let queuedProcesses = [];
+    let organizedProcesses = [];
+    queuedProcesses = processesCopy;
+    const processesCopyLength = processesCopy.length;
+
+    let counter = 0;
+
+    while (queuedProcesses.length > 0) {
+      if (queuedProcesses[counter].remainingBurstTime - timeQuantum <= 0) {
+        queuedProcesses[counter].burst =
+          queuedProcesses[counter].burst % timeQuantum || timeQuantum;
+        organizedProcesses.push(queuedProcesses[counter]);
+        queuedProcesses.splice(counter, 1);
+      } else {
+        queuedProcesses[counter].remainingBurstTime -= timeQuantum;
+        const pushedProcess = { ...queuedProcesses[counter] };
+        pushedProcess.burst = timeQuantum;
+        organizedProcesses.push(pushedProcess);
+        counter++;
+      }
+      if (counter > queuedProcesses.length - 1) {
+        counter = 0;
+      }
+    }
+
+    for (let i = 0; i < organizedProcesses.length; i++) {
+      console.log("organized process", i, organizedProcesses[i]);
+    }
+
+    // let finalProcesses = [];
+
+    // let currentProcess = organizedProcesses[0];
+    // currentProcess.burst = 1;
+
+    // for (let i = 1; i < organizedProcesses.length; i++) {
+    //   const current = organizedProcesses[i];
+    //   const previous = organizedProcesses[i - 1];
+
+    //   if (
+    //     current.id === previous.id &&
+    //     current.arrival_time === previous.arrival_time &&
+    //     current.priority === previous.priority
+    //   ) {
+    //     // Consecutive duplicate, update burst
+    //     currentProcess.burst += 1;
+    //   } else {
+    //     // Not a consecutive duplicate, push the current process and start a new one
+    //     finalProcesses.push({ ...currentProcess });
+    //     currentProcess = { ...current };
+    //     currentProcess.burst = 1;
+    //   }
+    // }
+
+    // // Push the last process
+    // finalProcesses.push({ ...currentProcess });
+    setProcesses(organizedProcesses);
   };
 
   const sumClones = (clonedProcesses) => {
