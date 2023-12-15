@@ -564,6 +564,12 @@ const OSForm = () => {
                     <th scope="col" class="px-6 py-3">
                       Burst
                     </th>
+                    <th scope="col" class="px-6 py-3">
+                      Turnaround Time
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                      Waiting Time
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -588,6 +594,10 @@ const OSForm = () => {
                               <td class="px-6 py-4">{process.arrival_time}</td>
                               <td class="px-6 py-4">{process.priority}</td>
                               <td class="px-6 py-4">{process.burst}</td>
+                              <td class="px-6 py-4">
+                                {process.turnaroundTime}
+                              </td>
+                              <td class="px-6 py-4">{process.waitingTime}</td>
                             </tr>
                           );
                         }
@@ -597,7 +607,7 @@ const OSForm = () => {
                   {numOfProcesses == 1 && (
                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                       <td
-                        colSpan="4"
+                        colSpan="6"
                         className="text-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                       >
                         No Processes yet
