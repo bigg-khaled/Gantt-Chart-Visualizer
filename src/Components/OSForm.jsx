@@ -12,6 +12,8 @@ const OSForm = () => {
   const [arrival_time, setArrival_time] = useState("");
   const [priority, setPriority] = useState("");
   const [burst, setBurst] = useState("");
+  const [finalAvgTAT, setFinalAvgTAT] = useState(0);
+  const [finalAvgWT, setFinalAvgWT] = useState(0);
 
   const burstSum = () => {
     return processes.reduce((sum, process) => sum + parseInt(process.burst), 0);
@@ -24,10 +26,12 @@ const OSForm = () => {
       return [
         ...currentProcesses,
         {
-          id: numOfProcesses,
-          arrival_time: arrival_time,
-          priority: priority,
-          burst: burst,
+          id: Number(numOfProcesses),
+          arrival_time: Number(arrival_time),
+          priority: Number(priority),
+          burst: Number(burst),
+          turnaroundTime: 0,
+          waitingTime: 0,
         },
       ];
     });
@@ -47,6 +51,9 @@ const OSForm = () => {
     setPriority("");
     setBurst("");
     setAlgorithm("");
+    setFinalAvgTAT(0);
+    setFinalAvgWT(0);
+    processedIds.clear();
   };
 
   const handleWaitingTime = () => {
@@ -85,6 +92,7 @@ const OSForm = () => {
     } else if (algorithm === "RR") {
       runRoundRobin(5);
     }
+    handleINFO();
   };
 
   const runSJF_NP = () => {
@@ -96,11 +104,11 @@ const OSForm = () => {
       (sum, process) => sum + Number(process.burst),
       0
     );
-    const minArrivalTime = Math.min(
-      ...processes.map((process) => Number(process.arrival_time))
-    );
+    // const minArrivalTime = Math.min(
+    //   ...processes.map((process) => Number(process.arrival_time))
+    // );
 
-    let maxArrivalTimeProcess = burstTotal + minArrivalTime;
+    let maxArrivalTimeProcess = burstTotal + minArrivalTimeProcess;
 
     let queuedProcesses = [];
     let organizedProcesses = [];
@@ -301,7 +309,7 @@ const OSForm = () => {
 
       if (queuedProcesses.length > 0) {
         //sort queuedProcesses by burst time
-        queuedProcesses.sort((a, b) => Number(a.priority) - Number(b.priority));
+        queuedProcesses.sort((a, b) => Number(b.priority) - Number(a.priority));
         console.log(
           "At t = ",
           t,
@@ -400,33 +408,6 @@ const OSForm = () => {
     for (let i = 0; i < organizedProcesses.length; i++) {
       console.log("organized process", i, organizedProcesses[i]);
     }
-
-    // let finalProcesses = [];
-
-    // let currentProcess = organizedProcesses[0];
-    // currentProcess.burst = 1;
-
-    // for (let i = 1; i < organizedProcesses.length; i++) {
-    //   const current = organizedProcesses[i];
-    //   const previous = organizedProcesses[i - 1];
-
-    //   if (
-    //     current.id === previous.id &&
-    //     current.arrival_time === previous.arrival_time &&
-    //     current.priority === previous.priority
-    //   ) {
-    //     // Consecutive duplicate, update burst
-    //     currentProcess.burst += 1;
-    //   } else {
-    //     // Not a consecutive duplicate, push the current process and start a new one
-    //     finalProcesses.push({ ...currentProcess });
-    //     currentProcess = { ...current };
-    //     currentProcess.burst = 1;
-    //   }
-    // }
-
-    // // Push the last process
-    // finalProcesses.push({ ...currentProcess });
     setProcesses(organizedProcesses);
   };
 
@@ -458,6 +439,43 @@ const OSForm = () => {
     }
   };
 
+  const handleINFO = () => {
+    for (let i = 0; i < processes.length; i++) {
+      let totalBurst = 0;
+      let waitingTime = 0;
+      for (let j = 0; j <= i; j++) {
+        totalBurst += processes[j].burst;
+      }
+      totalBurst += processes[0].arrival_time;
+
+      processes[i].turnaroundTime = totalBurst - processes[i].arrival_time;
+      console.log("TAT", processes[i].turnaroundTime);
+      processes[i].waitingTime =
+        processes[i].turnaroundTime - processes[i].burst;
+      console.log("WT", processes[i].waitingTime);
+    }
+    let avgWT = 0;
+    let avgTAT = 0;
+
+    for (let i = 0; i < processes.length; i++) {
+      avgTAT += processes[i].turnaroundTime;
+
+      avgWT += processes[i].waitingTime;
+    }
+    console.log("sumTAT= ", avgTAT);
+    console.log("sumTAT= ", avgWT);
+
+    avgTAT = avgTAT / processes.length;
+    setFinalAvgTAT(avgTAT);
+    console.log("AVGTAT= ", finalAvgTAT);
+
+    avgWT = avgWT / processes.length;
+    setFinalAvgWT(avgWT);
+    console.log("AVGWT= ", finalAvgWT);
+    console.log("AVGTAT2=", avgTAT);
+    console.log("AVGWT2=", avgWT);
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       handleSubmit(e);
@@ -467,6 +485,7 @@ const OSForm = () => {
   useEffect(() => {
     if (buttonPressed) {
       handleWaitingTime();
+      handleINFO();
     }
   }, [waitingTimeArray, buttonPressed]);
 
@@ -478,10 +497,7 @@ const OSForm = () => {
             <div className="form-row">
               <div class="mb-6">
                 <div class="grid grid-cols-4 gap-4">
-                  <label
-                    for="text"
-                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white my-auto"
-                  >
+                  <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white my-auto">
                     Enter new process:
                   </label>
                   <input
@@ -600,7 +616,6 @@ const OSForm = () => {
                 Select an algorithm
               </label>
               <select
-                id="countries"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 value={algorithm}
                 onChange={(e) => {
