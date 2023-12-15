@@ -162,16 +162,6 @@ const OSForm = () => {
         waitingTimes[waitingTimes.length - 1] - process.arrival_time
       );
     });
-
-    // Display results
-    console.log(
-      "Process\tPriority\tArrival Time\tBurst Time\tCompletion Time\tTurnaround Time\tWaiting Time\tResponse Time"
-    );
-    processes.forEach((process, index) => {
-      console.log(
-        `${process.process_id}\t${process.priority}\t\t${process.arrival_time}\t\t${process.burst_time}\t\t${completionTime}\t\t${turnaroundTimes[index]}\t\t${waitingTimes[index]}\t\t${responseTimes[index]}`
-      );
-    });
   };
   const runSJF_P = () => {
     let processesCopy = processes.map((process) => ({
@@ -310,15 +300,7 @@ const OSForm = () => {
       if (queuedProcesses.length > 0) {
         //sort queuedProcesses by burst time
         queuedProcesses.sort((a, b) => Number(b.priority) - Number(a.priority));
-        console.log(
-          "At t = ",
-          t,
-          "the highest priority is",
-          queuedProcesses[0]
-        );
-        for (let i = 0; i < queuedProcesses.length; i++) {
-          console.log("queue number", i, "is", queuedProcesses[i]);
-        }
+
         //add to organizedProcesses
         organizedProcesses.push(queuedProcesses[0]);
 
@@ -366,24 +348,9 @@ const OSForm = () => {
       remainingBurstTime: Number(process.burst),
     }));
 
-    let minArrivalTimeProcess = Math.min(
-      ...processesCopy.map((process) => Number(process.arrival_time))
-    );
-
-    const burstTotal = processesCopy.reduce(
-      (sum, process) => sum + Number(process.burst),
-      0
-    );
-    const minArrivalTime = Math.min(
-      ...processesCopy.map((process) => Number(process.arrival_time))
-    );
-
-    let maxArrivalTimeProcess = burstTotal + minArrivalTime;
-
     let queuedProcesses = [];
     let organizedProcesses = [];
     queuedProcesses = processesCopy;
-    const processesCopyLength = processesCopy.length;
 
     let counter = 0;
 
@@ -442,17 +409,14 @@ const OSForm = () => {
   const handleINFO = () => {
     for (let i = 0; i < processes.length; i++) {
       let totalBurst = 0;
-      let waitingTime = 0;
       for (let j = 0; j <= i; j++) {
         totalBurst += processes[j].burst;
       }
       totalBurst += processes[0].arrival_time;
 
       processes[i].turnaroundTime = totalBurst - processes[i].arrival_time;
-      console.log("TAT", processes[i].turnaroundTime);
       processes[i].waitingTime =
         processes[i].turnaroundTime - processes[i].burst;
-      console.log("WT", processes[i].waitingTime);
     }
     let avgWT = 0;
     let avgTAT = 0;
@@ -462,18 +426,12 @@ const OSForm = () => {
 
       avgWT += processes[i].waitingTime;
     }
-    console.log("sumTAT= ", avgTAT);
-    console.log("sumTAT= ", avgWT);
 
     avgTAT = avgTAT / processes.length;
     setFinalAvgTAT(avgTAT);
-    console.log("AVGTAT= ", finalAvgTAT);
 
     avgWT = avgWT / processes.length;
     setFinalAvgWT(avgWT);
-    console.log("AVGWT= ", finalAvgWT);
-    console.log("AVGTAT2=", avgTAT);
-    console.log("AVGWT2=", avgWT);
   };
 
   const handleKeyDown = (e) => {
@@ -694,14 +652,16 @@ const OSForm = () => {
                 })}
             </div>
 
-            <div className="justify-start text-left">
-              <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white my-auto">
-                Average Turnaround Time: {finalAvgTAT.toPrecision(2)}
-              </label>
-              <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white my-auto">
-                Average Waiting Time: {finalAvgWT.toPrecision(2)}
-              </label>
-            </div>
+            {buttonPressed && (
+              <div className="justify-start text-left">
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white my-auto">
+                  Average Turnaround Time: {finalAvgTAT.toPrecision(2)}
+                </label>
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white my-auto">
+                  Average Waiting Time: {finalAvgWT.toPrecision(2)}
+                </label>
+              </div>
+            )}
           </form>
         </div>
       </div>
