@@ -142,26 +142,50 @@ const OSForm = () => {
     setProcesses(organizedProcesses);
   };
   const runPriority_NP = () => {
-    // Assuming processes is an array of objects with properties: process_id, priority, arrival_time, and burst_time
+    let minArrivalTimeProcess = Math.min(
+      ...processes.map((process) => Number(process.arrival_time))
+    );
 
-    // Sort processes by priority (lower number means higher priority)
-    processes.sort((a, b) => a.priority - b.priority);
+    const burstTotal = processes.reduce(
+      (sum, process) => sum + Number(process.burst),
+      0
+    );
+    // const minArrivalTime = Math.min(
+    //   ...processes.map((process) => Number(process.arrival_time))
+    // );
 
-    let completionTime = 0;
-    let turnaroundTimes = [];
-    let waitingTimes = [];
-    let responseTimes = [];
+    let maxArrivalTimeProcess = burstTotal + minArrivalTimeProcess;
 
-    processes.forEach((process) => {
-      completionTime += process.burst_time;
-      turnaroundTimes.push(completionTime - process.arrival_time);
-      waitingTimes.push(
-        turnaroundTimes[turnaroundTimes.length - 1] - process.burst_time
+    let queuedProcesses = [];
+    let organizedProcesses = [];
+    let totalBurstTime = Number(minArrivalTimeProcess);
+
+    for (
+      let t = Number(minArrivalTimeProcess);
+      t <= Number(maxArrivalTimeProcess);
+      t++
+    ) {
+      //find index of first process with arrival time == t
+      const foundProcesses = processes.filter(
+        (process) => Number(process.arrival_time) === t
       );
-      responseTimes.push(
-        waitingTimes[waitingTimes.length - 1] - process.arrival_time
-      );
-    });
+
+      if (foundProcesses.length > 0) {
+        queuedProcesses.push(...foundProcesses);
+      }
+
+      if (totalBurstTime === t && queuedProcesses.length > 0) {
+        //sort queuedProcesses by burst time
+        queuedProcesses.sort((a, b) => b.priority - a.priority);
+        //add to organizedProcesses
+        organizedProcesses.push(queuedProcesses[0]);
+
+        totalBurstTime += Number(queuedProcesses[0].burst);
+        //remove from queuedProcesses
+        queuedProcesses.shift();
+      }
+    }
+    setProcesses(organizedProcesses);
   };
   const runSJF_P = () => {
     let processesCopy = processes.map((process) => ({
