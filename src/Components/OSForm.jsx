@@ -80,6 +80,8 @@ const OSForm = () => {
       runPriority_NP();
     } else if (algorithm === "SJF-P") {
       runSJF_P();
+    } else if (algorithm === "P-P") {
+      runPriority_P();
     }
   };
 
@@ -256,6 +258,125 @@ const OSForm = () => {
     // Push the last process
     finalProcesses.push({ ...currentProcess });
     setProcesses(finalProcesses);
+  };
+  const runPriority_P = () => {
+    let processesCopy = processes.map((process) => ({
+      ...process,
+      remainingBurstTime: Number(process.burst),
+    }));
+
+    let minArrivalTimeProcess = Math.min(
+      ...processesCopy.map((process) => Number(process.arrival_time))
+    );
+
+    const burstTotal = processesCopy.reduce(
+      (sum, process) => sum + Number(process.burst),
+      0
+    );
+    const minArrivalTime = Math.min(
+      ...processesCopy.map((process) => Number(process.arrival_time))
+    );
+
+    let maxArrivalTimeProcess = burstTotal + minArrivalTime;
+
+    let queuedProcesses = [];
+    let organizedProcesses = [];
+    let totalBurstTime = Number(minArrivalTimeProcess);
+
+    for (
+      let t = Number(minArrivalTimeProcess);
+      t <= Number(maxArrivalTimeProcess);
+      t++
+    ) {
+      //find index of first process with arrival time == t
+      const foundProcesses = processesCopy.filter(
+        (process) => Number(process.arrival_time) === t
+      );
+
+      if (foundProcesses.length > 0) {
+        queuedProcesses.push(...foundProcesses);
+      }
+
+      if (queuedProcesses.length > 0) {
+        //sort queuedProcesses by burst time
+        queuedProcesses.sort((a, b) => Number(a.priority) - Number(b.priority));
+        console.log(
+          "At t = ",
+          t,
+          "the highest priority is",
+          queuedProcesses[0]
+        );
+        for (let i = 0; i < queuedProcesses.length; i++) {
+          console.log("queue number", i, "is", queuedProcesses[i]);
+        }
+        //add to organizedProcesses
+        organizedProcesses.push(queuedProcesses[0]);
+
+        totalBurstTime += 1;
+        //remove from queuedProcesses
+        if (queuedProcesses[0].remainingBurstTime > 1) {
+          queuedProcesses[0].remainingBurstTime -= 1;
+        } else {
+          queuedProcesses.shift();
+        }
+      }
+    }
+
+    let finalProcesses = [];
+
+    let currentProcess = organizedProcesses[0];
+    currentProcess.burst = 1;
+
+    for (let i = 1; i < organizedProcesses.length; i++) {
+      const current = organizedProcesses[i];
+      const previous = organizedProcesses[i - 1];
+
+      if (
+        current.id === previous.id &&
+        current.arrival_time === previous.arrival_time &&
+        current.priority === previous.priority
+      ) {
+        // Consecutive duplicate, update burst
+        currentProcess.burst += 1;
+      } else {
+        // Not a consecutive duplicate, push the current process and start a new one
+        finalProcesses.push({ ...currentProcess });
+        currentProcess = { ...current };
+        currentProcess.burst = 1;
+      }
+    }
+
+    // Push the last process
+    finalProcesses.push({ ...currentProcess });
+    setProcesses(finalProcesses);
+  };
+
+  const sumClones = (clonedProcesses) => {
+    if (Array.isArray(clonedProcesses)) {
+      let counter = 1;
+      const result = [];
+
+      for (let i = 0; i < clonedProcesses.length; i++) {
+        const process = clonedProcesses[i];
+        const isClone = i > 0 && process.id === clonedProcesses[i - 1].id;
+
+        if (isClone) {
+          result[result.length - 1].burst += process.burst;
+        } else {
+          if (counter > 1) {
+            // Divide process.burst only if it's not the first occurrence
+            process.burst /= counter;
+          }
+
+          result.push({ ...process });
+          counter = 1;
+        }
+
+        counter++; // Increment counter for each process
+      }
+
+      return result;
+    }
   };
 
   const handleKeyDown = (e) => {
