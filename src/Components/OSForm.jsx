@@ -15,6 +15,7 @@ const OSForm = () => {
   const [finalAvgTAT, setFinalAvgTAT] = useState(0);
   const [finalAvgWT, setFinalAvgWT] = useState(0);
   const [RRTimeQuantum, setRRTimeQuantum] = useState("");
+  const [tableProcesses, setTableProcesses] = useState([]);
 
   const burstSum = () => {
     return processes.reduce((sum, process) => sum + parseInt(process.burst), 0);
@@ -24,6 +25,19 @@ const OSForm = () => {
     e.preventDefault();
 
     setProcesses((currentProcesses) => {
+      return [
+        ...currentProcesses,
+        {
+          id: Number(numOfProcesses),
+          arrival_time: Number(arrival_time),
+          priority: Number(priority),
+          burst: Number(burst),
+          turnaroundTime: 0,
+          waitingTime: 0,
+        },
+      ];
+    });
+    setTableProcesses((currentProcesses) => {
       return [
         ...currentProcesses,
         {
@@ -55,6 +69,7 @@ const OSForm = () => {
     setFinalAvgTAT(0);
     setFinalAvgWT(0);
     processedIds.clear();
+    setTableProcesses([]);
   };
 
   const handleWaitingTime = () => {
@@ -194,10 +209,6 @@ const OSForm = () => {
       remainingBurstTime: Number(process.burst),
     }));
 
-    for (let i = 0; i < processesCopy.length; i++) {
-      console.log("processesCopy", i, processesCopy[i]);
-    }
-
     let minArrivalTimeProcess = Math.min(
       ...processesCopy.map((process) => Number(process.arrival_time))
     );
@@ -221,7 +232,6 @@ const OSForm = () => {
       t <= Number(maxArrivalTimeProcess);
       t++
     ) {
-      console.log("t", t);
       //find index of first process with arrival time == t
       const foundProcesses = processesCopy.filter(
         (process) => Number(process.arrival_time) === t
@@ -240,12 +250,6 @@ const OSForm = () => {
         //add to organizedProcesses
         organizedProcesses.push(queuedProcesses[0]);
 
-        for (let i = 0; i < organizedProcesses.length; i++) {
-          console.log("organized process", i, organizedProcesses[i]);
-        }
-        for (let i = 0; i < queuedProcesses.length; i++) {
-          console.log("queued process", i, queuedProcesses[i]);
-        }
         totalBurstTime += 1;
         //remove from queuedProcesses
         if (queuedProcesses[0].remainingBurstTime > 1) {
@@ -414,9 +418,7 @@ const OSForm = () => {
       }
     }
 
-    for (let i = 0; i < organizedProcesses.length; i++) {
-      console.log("organized process", i, organizedProcesses[i]);
-    }
+    for (let i = 0; i < organizedProcesses.length; i++) {}
     setProcesses(organizedProcesses);
   };
 
@@ -449,7 +451,6 @@ const OSForm = () => {
   };
 
   const handleINFO = () => {
-    console.log("processes length", processes.length);
     for (let i = 0; i < processes.length; i++) {
       let totalBurst = 0;
       let isRepeated = false;
@@ -457,7 +458,6 @@ const OSForm = () => {
         totalBurst += processes[j].burst;
       }
       totalBurst += processes[0].arrival_time;
-      // Make an if condition that the next 2 lines only happen if the process id is the last repeatition of itself
       for (let x = i + 1; x < processes.length; x++) {
         if (processes[i].id === processes[x].id) {
           isRepeated = true;
@@ -466,7 +466,15 @@ const OSForm = () => {
       if (!isRepeated) {
         processes[i].turnaroundTime = totalBurst - processes[i].arrival_time;
         processes[i].waitingTime =
-          processes[i].turnaroundTime - processes[i].burst;
+          processes[i].turnaroundTime -
+          findLastInstanceById(tableProcesses, processes[i].id).burst;
+        //console log the calculations for each process and writing how the numbers are added or subtracted etc
+        console.log(
+          `Process ${processes[i].id} Turnaround Time = ${totalBurst} - ${processes[i].arrival_time} = ${processes[i].turnaroundTime}`
+        );
+        console.log(
+          `Process ${processes[i].id} Waiting Time = ${processes[i].turnaroundTime} - ${processes[i].burst} = ${processes[i].waitingTime}`
+        );
       }
     }
     let avgWT = 0;
@@ -499,6 +507,20 @@ const OSForm = () => {
     });
 
     return Array.from(uniqueProcessesMap.values());
+  }
+
+  function findLastInstanceById(array, targetId) {
+    let lastInstance = null;
+
+    for (let i = array.length - 1; i >= 0; i--) {
+      const current = array[i];
+      if (current.id === targetId) {
+        lastInstance = current;
+        break;
+      }
+    }
+
+    return lastInstance;
   }
 
   useEffect(() => {
@@ -593,9 +615,8 @@ const OSForm = () => {
                 </thead>
                 <tbody>
                   {numOfProcesses > 1 &&
-                    processes.map((process) => {
+                    tableProcesses.map((process) => {
                       {
-                        processedIds.add(process.id);
                         return (
                           <tr
                             key={process.id} // Ensure each element has a unique key
@@ -610,8 +631,19 @@ const OSForm = () => {
                             <td class="px-6 py-4">{process.arrival_time}</td>
                             <td class="px-6 py-4">{process.priority}</td>
                             <td class="px-6 py-4">{process.burst}</td>
-                            <td class="px-6 py-4">{process.turnaroundTime}</td>
-                            <td class="px-6 py-4">{process.waitingTime}</td>
+
+                            <td class="px-6 py-4">
+                              {
+                                findLastInstanceById(processes, process.id)
+                                  .turnaroundTime
+                              }
+                            </td>
+                            <td class="px-6 py-4">
+                              {
+                                findLastInstanceById(processes, process.id)
+                                  .waitingTime
+                              }
+                            </td>
                           </tr>
                         );
                       }
