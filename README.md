@@ -1,6 +1,25 @@
-# Getting Started with Create React App
+# Gantt Chart Visualizer
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A Gantt chart stands as a practical cornerstone in project management, offering a
+straightforward visual representation of task schedules over time. When delving into CPU scheduling
+algorithms, the Gantt chart assumes a pivotal role in elucidating the execution timeline of processes.
+Algorithms, such as the commonly used Round Robin or Shortest Job First, dictate the order in which
+processes are granted CPU time.
+This visual tool, in the form of a Gantt chart, simplifies the complex task of understanding the
+scheduling intricacies, facilitating an easy-to-interpret display. It becomes an invaluable aid in analyzing
+resource utilization, turnaround times, and the overall efficiency of a computing system. In the
+development of our web application, ReactJS was employed—a web app framework utilizing JavaScript,
+HTML, and CSS. Additionally, TailWindCSS was leveraged to enhance and streamline the application's
+styling.
+
+Navigating through our web app is designed to be user-friendly and intuitive. Users input
+individual processes, including arrival time, priority, and burst time, which are then displayed in a
+comprehensive table. Once all processes are entered, users can select a scheduling algorithm and click
+"Generate" to witness the Gantt chart dynamically organized by the chosen algorithm. Additionally, the
+average turnaround time and waiting time are presented below the Gantt chart, providing a
+comprehensive overview of the scheduled processes.
+
+An interactive demo can be viewed [here]((https://gcv-eight.vercel.app/)).
 
 ## Available Scripts
 
@@ -17,7 +36,6 @@ You may also see any lint errors in the console.
 ### `npm test`
 
 Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
 ### `npm run build`
 
@@ -39,32 +57,4 @@ Instead, it will copy all the configuration files and the transitive dependencie
 
 You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Final Notes
