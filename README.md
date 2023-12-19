@@ -19,7 +19,7 @@ comprehensive table. Once all processes are entered, users can select a scheduli
 average turnaround time and waiting time are presented below the Gantt chart, providing a
 comprehensive overview of the scheduled processes.
 
-An interactive demo can be viewed [here]((https://gcv-eight.vercel.app/)).
+An interactive demo can be viewed [here](https://gcv-eight.vercel.app/).
 
 ## Available Scripts
 
